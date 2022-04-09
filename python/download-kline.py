@@ -57,7 +57,7 @@ def download_monthly_klines(trading_type, symbols, num_symbols, intervals, years
               if folder:
                 file_path = os.path.join(folder, path + file_name)
               if not os.path.isfile(file_path):
-                print(file_path + " 文件不存在")
+                # print(file_path + " 文件不存在")
                 continue
               cur_sha256_sum = hashlib.sha256(open(file_path, "rb").read()).hexdigest()
               checksum_file_path = os.path.join(".", checksum_path + checksum_file_name)
@@ -72,10 +72,13 @@ def download_monthly_klines(trading_type, symbols, num_symbols, intervals, years
                 print(cur_sha256_sum)
                 print(target_sum)
                 print("数据不完整重新下载")
+                # 删除文件
+                os.remove(file_path)
                 download_file(path, file_name, date_range, folder)
-                download_file(checksum_path, checksum_file_name, date_range, folder)
                 cur_sha256_sum = hashlib.sha256(open(file_path, "rb").read()).hexdigest()
-                target_sum = open(checksum_file_path, "r").read().split()[0]
+                if target_sum == "":
+                  download_file(checksum_path, checksum_file_name, date_range, folder)
+                  target_sum = open(checksum_file_path, "r").read().split()[0]
 
     current += 1
 
