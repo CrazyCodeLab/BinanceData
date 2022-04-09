@@ -10,6 +10,8 @@
 import sys
 from datetime import *
 import pandas as pd
+import os
+import hashlib
 from enums import *
 from utility import download_file, get_all_symbols, get_parser, get_start_end_date_objects, convert_to_date_object, \
   get_path
@@ -49,6 +51,31 @@ def download_monthly_klines(trading_type, symbols, num_symbols, intervals, years
               checksum_path = get_path(trading_type, "klines", "monthly", symbol, interval)
               checksum_file_name = "{}-{}-{}-{}.zip.CHECKSUM".format(symbol.upper(), interval, year, '{:02d}'.format(month))
               download_file(checksum_path, checksum_file_name, date_range, folder)
+
+              # 数据完整性校验
+              file_path = os.path.join(".", path + file_name)
+              if folder:
+                file_path = os.path.join(folder, path + file_name)
+              if not os.path.isfile(file_path):
+                print(file_path + " 文件不存在")
+                continue
+              cur_sha256_sum = hashlib.sha256(open(file_path, "rb").read()).hexdigest()
+              checksum_file_path = os.path.join(".", checksum_path + checksum_file_name)
+              if folder:
+                checksum_file_path = os.path.join(folder, checksum_path + checksum_file_name)
+              target_sum = ""
+              if os.path.isfile(checksum_file_path):
+                target_sum = open(checksum_file_path, "r").read().split()[0]
+
+              # 数据不完整重新下载
+              while cur_sha256_sum != target_sum:
+                print(cur_sha256_sum)
+                print(target_sum)
+                print("数据不完整重新下载")
+                download_file(path, file_name, date_range, folder)
+                download_file(checksum_path, checksum_file_name, date_range, folder)
+                cur_sha256_sum = hashlib.sha256(open(file_path, "rb").read()).hexdigest()
+                target_sum = open(checksum_file_path, "r").read().split()[0]
 
     current += 1
 
