@@ -2,6 +2,7 @@
 
 为了帮助用户轻松下载我们的公共数据，我们已将所有货币对的所有 Kline、Trade 和 AggTrade 数据逐月放到网上。
 
+[API 文档](https://binance-docs.github.io/apidocs/spot/cn/#market_data)
 
 ## 有哪些数据可用
 
